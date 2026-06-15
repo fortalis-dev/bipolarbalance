@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- ── App overview ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="How My Balance works"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_surface"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="My Balance helps people with bipolar disorder track their mood, sleep, and daily patterns — then reveals insights about what influences their energy and balance."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Drive ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Drive — your energy level"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Drive is a 7-level thermometer for how you're feeling right now:\n\n• 1–2  Low / depressed / cold\n• 3–5  Balanced / optimal range\n• 6–7  High / elevated / manic\n\nTap the bar on the Drive tab (or the home-screen widget) as many times as you want during the day. Each tap is timestamped and stored. The app automatically computes your Auto Drive — the average of all your taps that day.\n\nExample: you tap 3, then 4, then 5 during the day → Auto Drive = 4."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Auto Drive vs Manual ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Auto Drive vs Daily Drive"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Auto Drive is computed automatically from all your inputs during the day.\n\nIn Daily Entry you can optionally override this with a Manual Drive value — useful if you want to say &quot;overall today was a 2&quot; even though your individual inputs were higher. The override only affects the Daily Entry summary; it does NOT change the Drive tab history or the Balance Score (which always uses Auto Drive).\n\nTap 'Reset to auto' in Daily Entry to remove a manual override."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Sleep ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sleep (Suspend)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set how many hours you slept last night using the purple bar in Daily Entry or the home-screen Sleep widget. Optimal sleep for Balance Score: 7–9 hours."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Balance Score ── -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/insight_card"
+            app:cardElevation="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚖  Balance Score"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="The Balance Score combines Auto Drive and Sleep into a single number.\n\nOptimal (score ≈ 0):  Auto Drive 3–5  +  Sleep 7–9 h\n↑ Positive score: energy above optimal (elevated/manic direction)\n↓ Negative score: energy below optimal (low/depressed direction)\n\nImportant: the Balance Score uses Auto Drive — NOT the manual override. This ensures the score honestly reflects how you felt during the day based on your inputs, not a retrospective label.\n\nA good night's sleep (7–9 h) combined with a balanced drive (3–5) will always trend the score toward 0 — the optimal zone."
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ── Data points ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Custom Data Points"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Go to Settings › Custom Data to add your own tracking points. Three types are available:\n\n• Yes/No — e.g. 'Kids' (did I have the kids today?)\n• Counter — e.g. 'Water' (tap + each glass) or 'Smoke'\n• Hours — e.g. 'Work' (how many hours did I work?)\n\nEnable 'Persist to next day' for data points that should carry their value forward (e.g. 'Kids' starts as Yes until you change it to No).\n\nAll data points appear in Daily Entry where you set values each day. In Insights, the app shows correlations between each data point and your Drive level."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Notes ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notes"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Write notes in Daily Entry and tap 'Save note'. Each note is timestamped. Notes appear as pins (◀) on the Balance Score graph (tap a dot to see details). You can delete notes with a long-press."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Insights ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Insights"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Insights tab shows:\n\n• How your Auto Drive compares on high-sleep vs low-sleep days\n• Lag effect: does poor sleep affect Drive 1–3 days later?\n• Correlations (Pearson r) between Drive and each data point\n\nExample: if you add a 'Smoke' counter and after two high-smoke days your Drive shoots to 6–7, the app will show a positive correlation between smoking and elevated Drive. This can help you spot early warning signs for manic phases.\n\nUse the time-range chips (7 days / 30 days / All time) to filter the analysis."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Widgets ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Home-screen Widgets"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Two widgets are always available — long-press your home screen and choose Widgets:\n\n• Drive widget: 7-segment colour bar. Tap to log Drive instantly.\n• Sleep widget: 25-segment purple bar (0–24 h). Tap to set sleep.\n\nWidget taps are timestamped and feed directly into Auto Drive calculation."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── Backup ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Backup (Google Drive)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Settings › Backup lets you back up all data to your personal Google Drive (stored in a private app folder). Sign in, then tap Upload. To restore on another device: sign in and tap Download — data is merged, nothing is lost."
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.4"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ── About ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp">
+
+            <View
+                android:layout_width="48dp"
+                android:layout_height="1dp"
+                android:background="?android:attr/textColorSecondary"
+                android:alpha="0.25"
+                android:layout_marginBottom="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thank you for using My Balance"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/on_surface"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tv_homepage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🌐  fortalis-dev.github.io"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tv_contact_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✉  fortalis@proton.me"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tv_buy_coffee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="☕  Buy me a coffee"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="buymeacoffee.com/fortalis"
+                android:textSize="11sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="16dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</ScrollView>

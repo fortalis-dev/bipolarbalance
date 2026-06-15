@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simple thermometer-like foreground for the adaptive icon -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Thermometer tube -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,20 L58,20 L58,72 L50,72 Z" />
+    <!-- Thermometer fill (mercury) -->
+    <path
+        android:fillColor="#B71C1C"
+        android:pathData="M52,30 L56,30 L56,72 L52,72 Z" />
+    <!-- Bulb -->
+    <path
+        android:fillColor="#B71C1C"
+        android:pathData="M54,88 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0" />
+    <!-- Tick marks -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M58,27 L64,27 M58,35 L64,35 M58,43 L64,43 M58,51 L64,51 M58,59 L64,59 M58,67 L64,67 M58,72 L64,72" />
+</vector>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BarLevelApp">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".BarWidget"
+            android:label="Drive"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.bipolar.balance.ACTION_SET_LEVEL" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bar_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SuspendWidget"
+            android:label="Suspend"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.bipolar.balance.ACTION_SET_SUSPEND" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/suspend_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".CustomMetricWidget"
+            android:label="My Balance — Data Point"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.bipolar.balance.ACTION_YESNO_TOGGLE" />
+                <action android:name="com.bipolar.balance.ACTION_COUNTER_INC" />
+                <action android:name="com.bipolar.balance.ACTION_COUNTER_DEC" />
+                <action android:name="com.bipolar.balance.ACTION_RANGE_SET" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/custom_metric_widget_info" />
+        </receiver>
+
+        <activity
+            android:name=".CustomMetricWidgetConfig"
+            android:exported="true"
+            android:theme="@style/Theme.BarLevelApp">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

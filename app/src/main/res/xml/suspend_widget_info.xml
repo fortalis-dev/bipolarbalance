@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="60dp"
+    android:minHeight="220dp"
+    android:minResizeWidth="50dp"
+    android:minResizeHeight="180dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_suspend"
+    android:previewImage="@mipmap/ic_launcher"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/suspend_widget_desc" />

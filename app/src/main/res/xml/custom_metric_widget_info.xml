@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget metadata for the Custom Data Point widget.
+  Supports 1×1 (74dp) and larger. Resizable in both directions.
+-->
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="74dp"
+    android:minHeight="74dp"
+    android:minResizeWidth="50dp"
+    android:minResizeHeight="50dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_custom_metric"
+    android:configure="com.bipolar.balance.CustomMetricWidgetConfig"
+    android:previewImage="@mipmap/ic_launcher"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/custom_metric_widget_desc" />

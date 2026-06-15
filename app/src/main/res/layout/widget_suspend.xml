@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Suspend widget – 25 tappable rows (0 h at bottom, 24 h at top).
+  The filled (purple) region rises from the bottom to the selected hour.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="6dp"
+    android:background="@drawable/widget_background">
+
+    <TextView
+        android:id="@+id/tv_suspend_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0h"
+        android:textSize="12sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 25 segments: s24 (top = 24h) → s0 (bottom = 0h) -->
+        <TextView android:id="@+id/s24" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s23" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s22" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s21" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s20" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s19" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s18" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s17" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s16" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s15" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s14" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s13" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s12" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s11" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s10" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s9"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s8"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s7"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s6"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s5"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s4"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s3"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s2"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s1"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/s0"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="#BDBDBD"/>
+
+    </LinearLayout>
+
+</LinearLayout>

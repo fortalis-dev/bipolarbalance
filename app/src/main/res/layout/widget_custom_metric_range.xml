@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Range/Scale widget – 15 tappable segments, fills any widget size.
+  rs0 = bottom = min, rs14 = top = max.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="4dp"
+    android:background="@drawable/widget_background">
+
+    <TextView
+        android:id="@+id/tv_widget_metric_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Scale"
+        android:textColor="#B0B0B0"
+        android:textSize="9sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="5sp"
+        android:autoSizeMaxTextSize="12sp"
+        android:layout_marginBottom="2dp" />
+
+    <TextView
+        android:id="@+id/tv_widget_metric_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="—"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="6sp"
+        android:autoSizeMaxTextSize="14sp"
+        android:layout_marginBottom="3dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- rs14 = top = max value, rs0 = bottom = min value -->
+        <TextView android:id="@+id/rs14" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs13" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs12" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs11" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs10" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs9"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs8"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs7"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs6"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs5"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs4"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs3"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs2"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs1"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginBottom="1dp" android:background="#BDBDBD"/>
+        <TextView android:id="@+id/rs0"  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="#BDBDBD"/>
+
+    </LinearLayout>
+
+</LinearLayout>

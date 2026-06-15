@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#FFFAF8F8">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="My Balance"
+        android:textSize="12sp"
+        android:textColor="#A09090"
+        android:letterSpacing="0.1"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose a data point for this widget"
+        android:textSize="20sp"
+        android:textColor="#3D3030"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/config_metrics_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_add_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Widget"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#7B52A9"
+        android:textColor="#FFFFFF"
+        android:enabled="false" />
+
+</LinearLayout>

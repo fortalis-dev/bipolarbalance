@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AppWidget metadata.
+  minWidth  ~110dp  = 2 grid columns
+  minHeight ~220dp  = ~4 grid rows (gives room for 7 segments + buttons)
+  The widget is resizable so the user can make it taller.
+-->
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="220dp"
+    android:minResizeWidth="60dp"
+    android:minResizeHeight="180dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_bar"
+    android:previewImage="@mipmap/ic_launcher"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/drive_widget_desc" />

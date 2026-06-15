@@ -1,0 +1,84 @@
+<resources>
+    <string name="app_name">My Balance</string>
+    <string name="drive_widget_desc">Drive level (1–7)</string>
+    <string name="custom_metric_widget_desc">Track a custom data point from My Balance</string>
+    <string name="current_level">Current level: %d</string>
+    <string name="total_entries">Total entries: %d</string>
+    <string name="clear_history">Clear History</string>
+    <string name="histogram_title">Level History</string>
+    <string name="level_up">Increase level</string>
+    <string name="level_down">Decrease level</string>
+
+    <!-- Tabs (kept for backward compat) -->
+    <string name="tab_histogram">Histogram</string>
+    <string name="tab_daily">Daily Entry</string>
+    <string name="tab_drive">Drive</string>
+    <string name="tab_help">Help</string>
+
+    <!-- Navigation drawer -->
+    <string name="nav_open">Open navigation</string>
+    <string name="nav_close">Close navigation</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_drive">Drive</string>
+    <string name="nav_daily">Daily Entry</string>
+    <string name="nav_histogram">Histogram</string>
+    <string name="nav_insights">Insights</string>
+    <string name="nav_backup">Backup</string>
+    <string name="nav_help">Help</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Time range chips -->
+    <string name="range_all">All time</string>
+    <string name="range_7days">Last 7 days</string>
+    <string name="range_today">Today</string>
+
+    <!-- Toggle labels -->
+    <string name="toggle_drive">Drive</string>
+    <string name="toggle_suspend">Suspend</string>
+
+    <!-- Daily Entry -->
+    <string name="daily_entry_date">Daily Entry – %s</string>
+    <string name="day_starts_at">Day starts at 10:00  •  Tap a segment to set</string>
+    <string name="drive_label">Drive Level</string>
+    <string name="suspend_label">Suspend</string>
+    <string name="drive_level_value">Level %d</string>
+    <string name="drive_auto_avg">Auto avg: %.1f</string>
+    <string name="drive_manual_override">Manual override</string>
+    <string name="reset_to_auto">Reset to auto</string>
+    <string name="suspend_value">%dh</string>
+    <string name="saved_at">✓ Saved at %s</string>
+    <string name="not_saved_yet">Not saved yet today</string>
+
+    <!-- Drive sync tab -->
+    <string name="drive_title">Google Drive Backup</string>
+    <string name="not_signed_in">Not signed in</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_out">Sign out</string>
+    <string name="upload_backup">Upload backup</string>
+    <string name="download_backup">Download backup</string>
+
+    <!-- Suspend widget -->
+    <string name="suspend_widget_desc">Suspend duration (0-24 h)</string>
+
+    <!-- Help screen -->
+    <string name="help_drive_title">What is Drive?</string>
+    <string name="help_drive_body">Drive is a 7-level thermometer that represents your overall state during the day — level 1 (very low / cold / blue) to level 7 (very high / hot / red). Think of it like a temperature reading for how your day is going.\n\nTap a colour segment on the widget or in the Daily Entry screen to set it.</string>
+
+    <string name="help_suspend_title">What is Suspend?</string>
+    <string name="help_suspend_body">Suspend tracks how long you suspended (rested, paused, or were inactive) during the day, from 0 h up to 24 h.\n\nTap a segment on the purple Suspend bar in the Daily Entry screen or on the Suspend home-screen widget to set the duration.</string>
+
+    <string name="help_daily_title">Daily Entry</string>
+    <string name="help_daily_body">Each day you set one Drive level and one Suspend duration. This is the data that feeds the Histogram.\n\nThe entry can be updated at any point during the same logical day — only the most recent value is kept per day.</string>
+
+    <string name="help_day_title">When does a day start?</string>
+    <string name="help_day_body">A new logical day begins at 10:00 (10 AM, 24-hour clock) and runs until 09:59 the following morning.\n\nExamples:\n• 08:00 on April 11 → still April 10\'s day\n• 10:00 on April 11 → April 11\'s day begins\n\nIf you open the app before 10:00, you are editing the previous calendar day\'s entry.</string>
+
+    <string name="help_histogram_title">Reading the Histogram</string>
+    <string name="help_histogram_body">The Histogram shows one bar group per Drive level (1–7). The x-axis is the level; the y-axis is the number of days you logged at that level.\n\n• Blue bars = Drive series (how many days at each level)\n• Purple bars = average Suspend duration for days at that level\n\nUse the toggle switches to show or hide each series. Use the time-range chips to filter by today, the last 7 days, or all time. Pinch to zoom; drag to pan.</string>
+
+    <string name="help_widget_title">Home-screen Widgets</string>
+    <string name="help_widget_body">Two widgets are available — long-press your home screen and choose Widgets to add them:\n\n• Drive widget: the 7-segment colour bar. Tap a segment to instantly set your Drive level.\n• Suspend widget: the purple 25-segment bar (0 h – 24 h). Tap a segment to set the duration.\n\nWidget taps update the current values immediately and the Daily Entry screen reflects the latest value when you open the app.</string>
+
+    <string name="help_sync_title">Google Drive Backup</string>
+    <string name="help_sync_body">The Drive tab lets you back up all your data to your personal Google Drive — stored in a private app folder only My Balance can access.\n\nSetup:\n1. Tap Sign in with Google and choose your account.\n2. Tap Upload backup to save your data.\n3. On another device, sign in and tap Download backup to restore.\n\nData is merged on download — no entries are lost.</string>
+</resources>

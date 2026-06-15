@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Theme colours – soft aquarelle/watercolour palette -->
+    <color name="primary">#F4956A</color>           <!-- peach (unchanged) -->
+    <color name="primary_dark">#C97040</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#FDE8D8</color>
+    <color name="on_primary_container">#7A3A18</color>
+    <color name="secondary">#9AAFCE</color>          <!-- soft periwinkle blue -->
+    <color name="secondary_dark">#7090B0</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="surface">#FFFCFA</color>            <!-- warm near-white -->
+    <color name="on_surface">#3D3030</color>         <!-- warm dark brown -->
+    <color name="background">#FDF6F0</color>         <!-- warm cream (unchanged) -->
+
+    <!-- 7 level colours – muted watercolour spectrum (cool→warm) -->
+    <color name="level1">#7FA8C0</color>   <!-- dusty azure -->
+    <color name="level2">#6BADB8</color>   <!-- muted teal-blue -->
+    <color name="level3">#7DB5A3</color>   <!-- sage teal -->
+    <color name="level4">#8CBD8E</color>   <!-- sage green -->
+    <color name="level5">#D8BA77</color>   <!-- muted honey amber -->
+    <color name="level6">#D4916C</color>   <!-- terracotta -->
+    <color name="level7">#C07878</color>   <!-- dusty rose -->
+
+    <color name="segment_inactive">#D8CECC</color>
+    <color name="widget_background">#CC212121</color>
+
+    <!-- Quality graph colours (aquarelle) -->
+    <color name="quality_positive">#6B9FBF</color>   <!-- dusty blue -->
+    <color name="quality_neutral">#78AA8A</color>     <!-- sage green -->
+    <color name="quality_negative">#C28A80</color>    <!-- warm rose -->
+    <color name="quality_suspend">#A98BC4</color>     <!-- soft lavender -->
+    <color name="insight_card">#EAF0F8</color>        <!-- pale blue tint -->
+</resources>
