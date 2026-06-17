@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bipolar.balance.databinding.FragmentSettingsBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsFragment : Fragment() {
@@ -51,19 +52,39 @@ class SettingsFragment : Fragment() {
             navigateTo(NotificationsFragment())
         }
 
-        // 5. Toggle Suspend
+        // 5. Time Format
+        updateTimeFormatItem()
+
+        // 6. Toggle Suspend
         setupSwitchItem(b.itemToggleSuspend.root, "Track Suspend (Rest)", "Show rest duration in charts and entries", DataRepository.getSuspendTrackingEnabled(ctx)) { enabled ->
             DataRepository.setSuspendTrackingEnabled(ctx, enabled)
         }
 
-        // 6. Health Sync
+        // 7. Health Sync
         setupItem(b.itemHealthSync.root, "Health Connect", "Linking with Android Health Sync is under development", R.drawable.ic_nav_daily) {
             toast("This feature is currently in development")
         }
 
-        // 7. Help
+        // 8. Help
         setupItem(b.itemHelp.root, "How To Use", "Guide to understanding Drive and Suspend", R.drawable.ic_nav_histogram) {
             navigateTo(HelpFragment())
+        }
+    }
+
+    private fun updateTimeFormatItem() {
+        val ctx = requireContext()
+        val currentFmt = DataRepository.getTimeFormat(ctx)
+        val fmtNames = arrayOf("System Default", "24-hour (13:00)", "12-hour (1:00 PM)")
+        
+        setupItem(b.itemTimeFormat.root, "Time Format", fmtNames[currentFmt], R.drawable.ic_chevron_right) {
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle("Select Time Format")
+                .setSingleChoiceItems(fmtNames, currentFmt) { dialog, which ->
+                    DataRepository.setTimeFormat(ctx, which)
+                    updateTimeFormatItem()
+                    dialog.dismiss()
+                }
+                .show()
         }
     }
 

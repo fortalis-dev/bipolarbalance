@@ -30,6 +30,10 @@ object DataRepository {
     private const val KEY_NOTIF_TIME_MIN          = "notification_time_min"
     private const val KEY_START_DAY_HOUR          = "start_day_hour"
     private const val KEY_START_DAY_MIN           = "start_day_min"
+    private const val KEY_TIME_FORMAT             = "time_format_pref" // 0=System, 1=24h, 2=AM/PM
+
+    fun getTimeFormat(ctx: Context): Int = prefs(ctx).getInt(KEY_TIME_FORMAT, 0)
+    fun setTimeFormat(ctx: Context, fmt: Int) = prefs(ctx).edit().putInt(KEY_TIME_FORMAT, fmt).apply()
 
     fun getNotificationsEnabled(ctx: Context): Boolean =
         prefs(ctx).getBoolean(KEY_NOTIFS_ENABLED, false)

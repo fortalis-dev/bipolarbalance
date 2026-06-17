@@ -7,13 +7,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.bipolar.balance.databinding.FragmentNotificationsBinding
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class NotificationsFragment : Fragment() {
 
@@ -78,12 +81,30 @@ class NotificationsFragment : Fragment() {
                 DataRepository.setNotificationTime(ctx, hour, min)
                 updateTimeLabel(hour, min)
                 if (DataRepository.getNotificationsEnabled(ctx)) scheduleNotification(ctx)
-            }, currentH, currentM, true).show()
+            }, currentH, currentM, is24Hour(ctx)).show()
+        }
+    }
+
+    private fun is24Hour(ctx: Context): Boolean {
+        return when (DataRepository.getTimeFormat(ctx)) {
+            1 -> true
+            2 -> false
+            else -> DateFormat.is24HourFormat(ctx)
         }
     }
 
     private fun updateTimeLabel(h: Int, m: Int) {
-        b.tvNotifTime.text = "%02d:%02d".format(h, m)
+        val ctx = requireContext()
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, h)
+            set(Calendar.MINUTE, m)
+        }
+        
+        b.tvNotifTime.text = when (DataRepository.getTimeFormat(ctx)) {
+            1 -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(cal.time)
+            2 -> SimpleDateFormat("h:mm a", Locale.getDefault()).format(cal.time)
+            else -> DateFormat.getTimeFormat(ctx).format(cal.time)
+        }
     }
 
     private fun scheduleNotification(ctx: Context) {

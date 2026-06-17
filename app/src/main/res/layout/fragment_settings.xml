@@ -51,6 +51,10 @@
                 layout="@layout/item_setting" />
 
             <include
+                android:id="@+id/item_time_format"
+                layout="@layout/item_setting" />
+
+            <include
                 android:id="@+id/item_toggle_suspend"
                 layout="@layout/item_setting_switch" />
 

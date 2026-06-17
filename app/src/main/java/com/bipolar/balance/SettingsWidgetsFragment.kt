@@ -13,7 +13,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 /**
  * Settings sub-page for managing which data points have widgets enabled
@@ -214,7 +216,12 @@ class SettingsWidgetsFragment : Fragment() {
             set(Calendar.HOUR_OF_DAY, h)
             set(Calendar.MINUTE, m)
         }
-        return DateFormat.getTimeFormat(ctx).format(cal.time)
+        
+        return when (DataRepository.getTimeFormat(ctx)) {
+            1 -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(cal.time)
+            2 -> SimpleDateFormat("h:mm a", Locale.getDefault()).format(cal.time)
+            else -> DateFormat.getTimeFormat(ctx).format(cal.time)
+        }
     }
 
     private fun customMetricRow(ctx: android.content.Context, dp: Float, metric: CustomMetric): View {
