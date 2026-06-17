@@ -1,7 +1,11 @@
 package com.bipolar.balance
 
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.viewpager2.widget.ViewPager2
 import com.bipolar.balance.databinding.ActivityMainBinding
 
@@ -26,9 +30,25 @@ class MainActivity : AppCompatActivity() {
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
+
+        // Handle window insets for edge-to-edge
+        ViewCompat.setOnApplyWindowInsetsListener(b.root) { _, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            
+            // Apply top padding to AppBarLayout
+            b.root.findViewById<android.view.View>(R.id.toolbar)?.parent?.let { appBar ->
+                (appBar as? com.google.android.material.appbar.AppBarLayout)?.updatePadding(top = insets.top)
+            }
+
+            // Apply bottom padding to BottomNavigationView
+            b.bottomNav.updatePadding(bottom = insets.bottom)
+            
+            windowInsets
+        }
 
         setSupportActionBar(b.toolbar)
         supportActionBar?.title = getString(titles[0])

@@ -7,7 +7,11 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.*
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 
 /**
  * Configuration Activity launched by Android when the user adds a
@@ -23,6 +27,7 @@ class CustomMetricWidgetConfig : AppCompatActivity() {
     private val radioButtons = mutableListOf<RadioButton>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // Always set RESULT_CANCELED so back-press doesn't create a broken widget
@@ -38,6 +43,20 @@ class CustomMetricWidgetConfig : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_widget_config)
+
+        // Handle window insets
+        val root = findViewById<LinearLayout>(android.R.id.content).getChildAt(0)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(
+                left = insets.left,
+                top = insets.top,
+                right = insets.right,
+                bottom = insets.bottom
+            )
+            windowInsets
+        }
+
         btnAdd = findViewById(R.id.btn_add_widget)
 
         val container = findViewById<LinearLayout>(R.id.config_metrics_container)
