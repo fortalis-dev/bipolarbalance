@@ -57,6 +57,7 @@ class BackupFragment : Fragment() {
                 val account = task.getResult(ApiException::class.java)
                 updateSignInUi(account)
                 toast("Signed in as ${account.email}")
+                // Automatically check for backup on sign-in
                 checkExistingBackup(account)
             } catch (e: ApiException) {
                 Log.e("BackupFragment", "Sign-in failed with status code: ${e.statusCode}", e)
@@ -230,7 +231,12 @@ class BackupFragment : Fragment() {
                 Log.e("BackupFragment", "Download failed", e)
                 withContext(Dispatchers.Main) {
                     setLoading(false)
-                    toast("Download failed: ${e.message}")
+                    val msg = if (e.message?.contains("403") == true || e.toString().contains("403")) {
+                        "Download forbidden (403). Ensure 'Google Drive API' is ENABLED in Cloud Console Library."
+                    } else {
+                        "Download failed: ${e.message}"
+                    }
+                    toast(msg)
                 }
             }
         }
