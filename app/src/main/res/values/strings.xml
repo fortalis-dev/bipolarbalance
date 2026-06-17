@@ -23,7 +23,7 @@
     <string name="nav_daily">Daily Entry</string>
     <string name="nav_histogram">Histogram</string>
     <string name="nav_insights">Insights</string>
-    <string name="nav_backup">Backup</string>
+    <string name="nav_backup">Settings</string>
     <string name="nav_help">Help</string>
     <string name="nav_settings">Settings</string>
 

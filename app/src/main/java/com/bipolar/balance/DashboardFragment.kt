@@ -53,15 +53,15 @@ class DashboardFragment : Fragment() {
     }
 
     private fun currentDayKey(): String {
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.DAY_OF_YEAR, dayOffset)
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(cal.time)
+        val ms = System.currentTimeMillis() + dayOffset * 86_400_000L
+        return DataRepository.getLogicalDayKey(ms, requireContext())
     }
 
     private fun refresh() {
         val ctx    = requireContext()
         val dayKey = currentDayKey()
         val entry  = DataRepository.getEntryForDayKey(ctx, dayKey)
+        val trackingEnabled = DataRepository.getSuspendTrackingEnabled(ctx)
 
         // ── Navigation header ──
         val cal = Calendar.getInstance().also { it.add(Calendar.DAY_OF_YEAR, dayOffset) }
@@ -100,7 +100,8 @@ class DashboardFragment : Fragment() {
 
         // ── Quality over time graph ──
         b.qualityGraph.series        = DataRepository.getQualitySeries(ctx)
-        b.qualityGraph.suspendSeries = DataRepository.getSuspendSeries(ctx)
+        b.qualityGraph.suspendSeries = if (trackingEnabled) DataRepository.getSuspendSeries(ctx) else emptyList()
+        b.qualityGraph.showSuspend   = trackingEnabled
         b.qualityGraph.selectedDayKey = dayKey
         b.qualityGraph.notes         = DataRepository.getNoteSeries(ctx)
 
@@ -196,22 +197,30 @@ class DashboardFragment : Fragment() {
     }
 
     private fun showDayDetailCard(dayKey: String) {
-        val entry = DataRepository.getEntryForDayKey(requireContext(), dayKey) ?: run {
+        val ctx = requireContext()
+        val entry = DataRepository.getEntryForDayKey(ctx, dayKey) ?: run {
             b.cardDayDetail.visibility = View.GONE; return
         }
         val q    = DataRepository.getQualityForEntry(entry)
         val date = SimpleDateFormat("EEEE d MMMM", Locale.getDefault())
             .format(Date(DataRepository.dayKeyToMs(dayKey)))
-        val sleepH = entry.suspendMinutes / 60
-        val sleepM = entry.suspendMinutes % 60
-        val sleepStr = if (sleepM == 0) "${sleepH}h" else "${sleepH}h ${sleepM}m"
+        
+        val trackingEnabled = DataRepository.getSuspendTrackingEnabled(ctx)
+        val sleepStr = if (trackingEnabled) {
+            val sleepH = entry.suspendMinutes / 60
+            val sleepM = entry.suspendMinutes % 60
+            val s = if (sleepM == 0) "${sleepH}h" else "${sleepH}h ${sleepM}m"
+            "  •  Sleep: $s"
+        } else ""
+        
         val driveStr = if (entry.driveOverridden)
             "Auto: ${entry.autoDriveLevel}  Daily: ${entry.driveLevel} (manual)"
         else
             "${entry.driveLevel}"
+        
         b.tvDayDetailTitle.text = date
         b.tvDayDetailInfo.text  =
-            "Drive: $driveStr  •  Sleep: $sleepStr  •  Balance: ${"%.2f".format(q)}" +
+            "Drive: $driveStr$sleepStr  •  Balance: ${"%.2f".format(q)}" +
             "\n${balanceLabel(q)}"
         b.cardDayDetail.visibility = View.VISIBLE
     }

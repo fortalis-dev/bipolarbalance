@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.widget.RemoteViews
 
 /**
@@ -47,6 +48,7 @@ class BarWidget : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             val level = DataRepository.getCurrentLevel(context)
+            Log.d("BarWidget", "updateAppWidget: level=$level")
             val views = RemoteViews(context.packageName, R.layout.widget_bar)
 
             val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -58,10 +60,15 @@ class BarWidget : AppWidgetProvider() {
                 views.setInt(SEGMENT_IDS[segIndex], "setBackgroundColor", color)
 
                 // Wire a tap on each segment to broadcast ACTION_SET_LEVEL with that level.
+                // IMPORTANT: we include the level in the action string to make the Intent truly unique
                 val intent = Intent(context, BarWidget::class.java)
-                    .setAction(ACTION_SET_LEVEL)
+                    .setAction("${ACTION_SET_LEVEL}_$segLevel")
                     .putExtra(EXTRA_LEVEL, segLevel)
-                val pi = PendingIntent.getBroadcast(context, segLevel, intent, flags)
+                
+                // Use a unique request code for each segment
+                val requestCode = 200 + segLevel
+                val pi = PendingIntent.getBroadcast(context, requestCode, intent, flags)
+                
                 views.setOnClickPendingIntent(SEGMENT_IDS[segIndex], pi)
             }
 
@@ -79,9 +86,13 @@ class BarWidget : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        val action = intent.action ?: return
+        Log.d("BarWidget", "onReceive: action=$action")
         super.onReceive(context, intent)
-        if (intent.action == ACTION_SET_LEVEL) {
+        
+        if (action.startsWith(ACTION_SET_LEVEL)) {
             val level = intent.getIntExtra(EXTRA_LEVEL, -1)
+            Log.d("BarWidget", "ACTION_SET_LEVEL matched: level=$level")
             if (level in 1..7) {
                 DataRepository.saveDriveLevel(context, level)
                 DataRepository.autoUpdateDailyDrive(context)

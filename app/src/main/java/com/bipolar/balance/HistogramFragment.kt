@@ -53,22 +53,25 @@ class InsightsFragment : Fragment() {
         val entries = DataRepository.getDailyEntries(ctx)
             .filter { it.lastUpdatedMs >= sinceMs }
             .sortedBy { it.dayKey }
+        
+        val trackingEnabled = DataRepository.getSuspendTrackingEnabled(ctx)
 
         // ── Trend chart ──
         b.trendView.driveSeries    = entries.map { it.dayKey to it.driveLevel.toFloat() }
         b.trendView.autoDriveSeries = entries.map { it.dayKey to it.autoDriveLevel.toFloat() }
-        b.trendView.sleepSeries    = entries.map { it.dayKey to (it.suspendMinutes / 60f) }
+        b.trendView.sleepSeries    = if (trackingEnabled) entries.map { it.dayKey to (it.suspendMinutes / 60f) } else emptyList()
 
         // ── Insight cards ──
         val insights = DataRepository.getSleepDriveInsights(ctx, sinceMs)
 
+        b.cardInsightSummary.visibility = if (trackingEnabled) View.VISIBLE else View.GONE
         b.tvDriveHighSleep.text = insights.avgDriveHighSleep?.let { "%.1f".format(it) } ?: "—"
         b.tvDriveLowSleep.text  = insights.avgDriveLowSleep?.let  { "%.1f".format(it) } ?: "—"
         b.tvInsightText.text    = buildInsightText(insights)
 
         // ── Lag-effect analysis ──
         val lagData = DataRepository.getLagInsights(ctx)
-        if (lagData.isNotEmpty() && insights.dayCount >= 5) {
+        if (trackingEnabled && lagData.isNotEmpty() && insights.dayCount >= 5) {
             b.cardLag.visibility = View.VISIBLE
             b.tvLagText.text = buildLagText(lagData)
         } else {
@@ -76,10 +79,10 @@ class InsightsFragment : Fragment() {
         }
 
         // ── Correlation cards ──
-        buildCorrelations(ctx, entries)
+        buildCorrelations(ctx, entries, trackingEnabled)
     }
 
-    private fun buildCorrelations(ctx: android.content.Context, entries: List<DailyEntry>) {
+    private fun buildCorrelations(ctx: android.content.Context, entries: List<DailyEntry>, trackingEnabled: Boolean) {
         if (entries.size < 3) { b.cardCorrelations.visibility = View.GONE; return }
 
         val driveMap: Map<String, Float> = entries.associate { it.dayKey to it.driveLevel.toFloat() }
@@ -88,11 +91,13 @@ class InsightsFragment : Fragment() {
         var rowCount = 0
 
         // ── Sleep ──
-        val sleepMap: Map<String, Float> = entries.associate { it.dayKey to it.suspendMinutes / 60f }
-        val sleepR   = computeCorrelation(driveMap, sleepMap)
-        if (sleepR != null) {
-            b.correlationsContainer.addView(correlationRow(ctx, "Sleep", sleepR))
-            rowCount++
+        if (trackingEnabled) {
+            val sleepMap: Map<String, Float> = entries.associate { it.dayKey to it.suspendMinutes / 60f }
+            val sleepR   = computeCorrelation(driveMap, sleepMap)
+            if (sleepR != null) {
+                b.correlationsContainer.addView(correlationRow(ctx, "Sleep", sleepR))
+                rowCount++
+            }
         }
 
         // ── Custom metrics ──

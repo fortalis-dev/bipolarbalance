@@ -7,6 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
+import com.google.android.gms.common.api.ApiException
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -43,15 +50,21 @@ class BackupFragment : Fragment() {
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        Log.d("BackupFragment", "signInLauncher result: ${result.resultCode}")
         if (result.resultCode == Activity.RESULT_OK) {
-            GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                .addOnSuccessListener { account ->
-                    updateSignInUi(account)
-                    toast("Signed in as ${account.email}")
-                }
-                .addOnFailureListener { e ->
-                    toast("Sign-in failed: ${e.message}")
-                }
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                updateSignInUi(account)
+                toast("Signed in as ${account.email}")
+                checkExistingBackup(account)
+            } catch (e: ApiException) {
+                Log.e("BackupFragment", "Sign-in failed with status code: ${e.statusCode}", e)
+                toast("Sign-in failed (Error ${e.statusCode})")
+            }
+        } else {
+            Log.w("BackupFragment", "Sign-in cancelled or failed with code: ${result.resultCode}")
+            toast("Sign-in failed/cancelled (Code ${result.resultCode})")
         }
     }
 
@@ -67,10 +80,15 @@ class BackupFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        b.btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         b.btnSignIn.setOnClickListener { signIn() }
         b.btnSignOut.setOnClickListener { signOut() }
         b.btnUpload.setOnClickListener { upload() }
         b.btnDownload.setOnClickListener { download() }
+        b.btnCopySha1.setOnClickListener { copySha1() }
 
         // Restore previous sign-in silently.
         val account = GoogleSignIn.getLastSignedInAccount(requireContext())
@@ -98,6 +116,41 @@ class BackupFragment : Fragment() {
         }
     }
 
+    private fun checkExistingBackup(account: GoogleSignInAccount) {
+        setLoading(true)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val drive = buildDriveService(account)
+                val list = drive.files().list()
+                    .setSpaces("appDataFolder")
+                    .setQ("name='$BACKUP_FILENAME'")
+                    .execute()
+
+                withContext(Dispatchers.Main) {
+                    setLoading(false)
+                    if (list.files.isNotEmpty()) {
+                        showBackupOptionsDialog(account)
+                    } else {
+                        toast("No existing backup found. You can upload your current data.")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("BackupFragment", "Failed to check backup", e)
+                withContext(Dispatchers.Main) { setLoading(false) }
+            }
+        }
+    }
+
+    private fun showBackupOptionsDialog(account: GoogleSignInAccount) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Existing Backup Found")
+            .setMessage("What would you like to do with the data on Google Drive?")
+            .setPositiveButton("Merge (Recommended)") { _, _ -> download(account, DataRepository.ImportMode.MERGE) }
+            .setNeutralButton("Discard Local & Use Backup") { _, _ -> download(account, DataRepository.ImportMode.OVERWRITE_LOCAL) }
+            .setNegativeButton("Keep Local / Overwrite Drive") { _, _ -> upload() }
+            .show()
+    }
+
     private fun upload() {
         val account = GoogleSignIn.getLastSignedInAccount(requireContext())
         if (account == null) { toast("Please sign in first"); return }
@@ -108,7 +161,6 @@ class BackupFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val drive = buildDriveService(account)
-                // Check if the backup file already exists and delete it first.
                 val existing = drive.files().list()
                     .setSpaces("appDataFolder")
                     .setQ("name='$BACKUP_FILENAME'")
@@ -131,6 +183,7 @@ class BackupFragment : Fragment() {
                     refreshLastBackupLabel()
                 }
             } catch (e: Exception) {
+                Log.e("BackupFragment", "Upload failed", e)
                 withContext(Dispatchers.Main) {
                     setLoading(false)
                     toast("Upload failed: ${e.message}")
@@ -139,14 +192,14 @@ class BackupFragment : Fragment() {
         }
     }
 
-    private fun download() {
-        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
-        if (account == null) { toast("Please sign in first"); return }
+    private fun download(account: GoogleSignInAccount? = null, mode: DataRepository.ImportMode = DataRepository.ImportMode.MERGE) {
+        val activeAccount = account ?: GoogleSignIn.getLastSignedInAccount(requireContext())
+        if (activeAccount == null) { toast("Please sign in first"); return }
 
         setLoading(true)
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val drive = buildDriveService(account)
+                val drive = buildDriveService(activeAccount)
                 val list = drive.files().list()
                     .setSpaces("appDataFolder")
                     .setQ("name='$BACKUP_FILENAME'")
@@ -164,16 +217,17 @@ class BackupFragment : Fragment() {
                 val stream = drive.files().get(fileId).executeMediaAsInputStream()
                 val json = stream.bufferedReader().readText()
 
-                DataRepository.importJson(requireContext(), json)
+                DataRepository.importJson(requireContext(), json, mode)
 
                 withContext(Dispatchers.Main) {
                     val nowMs = System.currentTimeMillis()
                     DataRepository.saveLastBackupMs(requireContext(), nowMs)
                     setLoading(false)
-                    toast("Backup restored and merged")
+                    toast(if (mode == DataRepository.ImportMode.MERGE) "Backup merged" else "Local data replaced")
                     refreshLastBackupLabel()
                 }
             } catch (e: Exception) {
+                Log.e("BackupFragment", "Download failed", e)
                 withContext(Dispatchers.Main) {
                     setLoading(false)
                     toast("Download failed: ${e.message}")
@@ -218,8 +272,48 @@ class BackupFragment : Fragment() {
         b.btnDownload.isEnabled  = !loading
     }
 
-    private fun toast(msg: String) =
+    private fun copySha1() {
+        val ctx = requireContext()
+        try {
+            val packageInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            } else {
+                @Suppress("DEPRECATION")
+                ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_SIGNATURES)
+            }
+            
+            val signatures = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                packageInfo.signingInfo?.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.signatures
+            }
+
+            if (signatures != null) {
+                for (signature in signatures) {
+                    val md = java.security.MessageDigest.getInstance("SHA-1")
+                    val digest = md.digest(signature.toByteArray())
+                    val hexString = digest.joinToString(":") { "%02X".format(it) }
+                    
+                    val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("SHA-1", hexString)
+                    clipboard.setPrimaryClip(clip)
+                    toast("SHA-1 copied to clipboard")
+                    Log.d("BackupFragment", "Copied SHA-1: $hexString")
+                    return
+                }
+            } else {
+                toast("No signatures found")
+            }
+        } catch (e: Exception) {
+            Log.e("BackupFragment", "Failed to get SHA-1", e)
+            toast("Could not get SHA-1: ${e.message}")
+        }
+    }
+
+    private fun toast(msg: String) {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

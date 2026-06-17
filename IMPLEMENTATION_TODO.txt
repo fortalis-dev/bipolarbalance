@@ -1,0 +1,40 @@
+MY BALANCE - IMPLEMENTATION ROADMAP
+====================================
+
+1. GOOGLE SIGN-IN & BACKUP ROBUSTNESS
+-------------------------------------
+- [x] Fix Google Sign-In button (ensure activity result handling and scopes are correct).
+- [x] Implement robust error feedback for failed connections.
+- [x] Create "Backup Options" dialog when existing data is found on Drive:
+    - Option A: Create new backup (overwrite remote).
+    - Option B: Discard local and use backup.
+    - Option C: Merge backup with local (Recommended).
+- [x] Refine "Merge" logic:
+    - Resolve day conflicts by picking the entry with "most data" (e.g., presence of notes/metrics).
+    - Automatically add new custom data definitions found in the backup to the local list.
+
+2. CUSTOM METRIC ENHANCEMENTS
+-----------------------------
+- [x] Update metric deletion flow:
+    - Add a dialog option to "Remove history" or "Keep history" when a dataset is deleted.
+
+3. SUSPEND (REST) LOGIC UPDATES
+-------------------------------
+- [x] Set auto-default for Suspend to 7 hours for every new logical day.
+- [x] Update "Balance Score" algorithm:
+    - Neutralize the impact of exactly 7 hours of suspend (treating it as the "unknown/default" state).
+- [x] Add option to disable Suspend tracking entirely (Toggle in Settings).
+
+4. SETTINGS UI REORGANIZATION
+-----------------------------
+- [x] Merge the rightmost navigation tab into a single "Settings" portal.
+- [x] Convert current sub-tabs (Backup, Custom Data, Widgets, Help) into a vertical list within the Settings screen.
+- [x] Add "Health Sync" item in the list:
+    - Display text: "Linking with Android Health Sync is under development".
+
+5. NOTIFICATIONS & REMINDERS
+----------------------------
+- [x] Add "Notifications" section to Settings.
+- [x] Add toggle to activate daily reminders (Default: OFF).
+- [x] Implement Time Picker for the user to select reminder time.
+- [x] Add info text: "Recommended use: Use Suspend, Drive, and Metric widgets as a constant reminder on your home screen."

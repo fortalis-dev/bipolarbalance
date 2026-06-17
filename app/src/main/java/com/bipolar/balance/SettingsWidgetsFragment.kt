@@ -1,7 +1,10 @@
 package com.bipolar.balance
 
+import android.app.TimePickerDialog
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
+import java.util.Calendar
 
 /**
  * Settings sub-page for managing which data points have widgets enabled
@@ -28,6 +32,9 @@ class SettingsWidgetsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         container = view.findViewById(R.id.widgets_container)
+        view.findViewById<View>(R.id.btn_back).setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
     }
 
     override fun onResume() {
@@ -69,6 +76,11 @@ class SettingsWidgetsFragment : Fragment() {
 
         // Suspend: user-toggleable
         container?.addView(suspendToggleRow(ctx, dp))
+        container?.addView(divider())
+
+        // ── Start of Day ──────────────────────────────────────────────────────
+        container?.addView(sectionHeader("LOGICAL DAY"))
+        container?.addView(startDayRow(ctx, dp))
         container?.addView(divider())
 
         // ── Custom data point widgets ──────────────────────────────────────────
@@ -138,6 +150,72 @@ class SettingsWidgetsFragment : Fragment() {
             val ids = mgr.getAppWidgetIds(android.content.ComponentName(ctx, SuspendWidget::class.java))
             ids.forEach { SuspendWidget.updateAppWidget(ctx, mgr, it) }
         }
+
+    private fun startDayRow(ctx: Context, dp: Float): View {
+        val row = LinearLayout(ctx).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity     = Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setPadding((16 * dp).toInt(), (10 * dp).toInt(), (16 * dp).toInt(), (10 * dp).toInt())
+            
+            val attrs = intArrayOf(android.R.attr.selectableItemBackground)
+            val typedArray = ctx.obtainStyledAttributes(attrs)
+            background = typedArray.getDrawable(0)
+            typedArray.recycle()
+
+            isClickable = true
+            isFocusable = true
+        }
+        
+        val left = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        
+        left.addView(TextView(ctx).apply {
+            text = "Start new day at"
+            textSize = 15f
+            setTextColor(Color.parseColor("#3D3030"))
+        })
+        
+        left.addView(TextView(ctx).apply {
+            text = "Entries before this time count toward the previous day"
+            textSize = 12f
+            setTextColor(Color.parseColor("#A09090"))
+        })
+        
+        val timeView = TextView(ctx).apply {
+            val (h, m) = DataRepository.getStartDayTime(ctx)
+            text = formatTime(ctx, h, m)
+            textSize = 16f
+            setTextColor(Color.parseColor("#F4956A"))
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        }
+        
+        row.addView(left)
+        row.addView(timeView)
+        
+        row.setOnClickListener {
+            val (h, m) = DataRepository.getStartDayTime(ctx)
+            TimePickerDialog(ctx, { _, selectedH, selectedM ->
+                DataRepository.setStartDayTime(ctx, selectedH, selectedM)
+                timeView.text = formatTime(ctx, selectedH, selectedM)
+            }, h, m, DateFormat.is24HourFormat(ctx)).show()
+        }
+        
+        return row
+    }
+
+    private fun formatTime(ctx: Context, h: Int, m: Int): String {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, h)
+            set(Calendar.MINUTE, m)
+        }
+        return DateFormat.getTimeFormat(ctx).format(cal.time)
+    }
 
     private fun customMetricRow(ctx: android.content.Context, dp: Float, metric: CustomMetric): View {
         val row = LinearLayout(ctx).apply {

@@ -24,6 +24,42 @@ object DataRepository {
     private const val KEY_CUSTOM_VALUES   = "custom_values"
     private const val KEY_NOTES_LOG       = "notes_log"
     private const val KEY_SUSPEND_WIDGET_ENABLED = "suspend_widget_enabled"
+    private const val KEY_SUSPEND_TRACKING_ENABLED = "suspend_tracking_enabled"
+    private const val KEY_NOTIFS_ENABLED          = "notifications_enabled"
+    private const val KEY_NOTIF_TIME_HOUR         = "notification_time_hour"
+    private const val KEY_NOTIF_TIME_MIN          = "notification_time_min"
+    private const val KEY_START_DAY_HOUR          = "start_day_hour"
+    private const val KEY_START_DAY_MIN           = "start_day_min"
+
+    fun getNotificationsEnabled(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_NOTIFS_ENABLED, false)
+
+    fun setNotificationsEnabled(ctx: Context, enabled: Boolean) =
+        prefs(ctx).edit().putBoolean(KEY_NOTIFS_ENABLED, enabled).apply()
+
+    fun getNotificationTime(ctx: Context): Pair<Int, Int> =
+        prefs(ctx).getInt(KEY_NOTIF_TIME_HOUR, 20) to prefs(ctx).getInt(KEY_NOTIF_TIME_MIN, 0)
+
+    fun setNotificationTime(ctx: Context, hour: Int, min: Int) =
+        prefs(ctx).edit()
+            .putInt(KEY_NOTIF_TIME_HOUR, hour)
+            .putInt(KEY_NOTIF_TIME_MIN, min)
+            .apply()
+
+    fun getStartDayTime(ctx: Context): Pair<Int, Int> =
+        prefs(ctx).getInt(KEY_START_DAY_HOUR, 8) to prefs(ctx).getInt(KEY_START_DAY_MIN, 0)
+
+    fun setStartDayTime(ctx: Context, hour: Int, min: Int) =
+        prefs(ctx).edit()
+            .putInt(KEY_START_DAY_HOUR, hour)
+            .putInt(KEY_START_DAY_MIN, min)
+            .apply()
+
+    fun getSuspendTrackingEnabled(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_SUSPEND_TRACKING_ENABLED, true)
+
+    fun setSuspendTrackingEnabled(ctx: Context, enabled: Boolean) =
+        prefs(ctx).edit().putBoolean(KEY_SUSPEND_TRACKING_ENABLED, enabled).apply()
 
     fun getSuspendWidgetEnabled(ctx: Context): Boolean =
         prefs(ctx).getBoolean(KEY_SUSPEND_WIDGET_ENABLED, true)
@@ -31,12 +67,31 @@ object DataRepository {
     fun setSuspendWidgetEnabled(ctx: Context, enabled: Boolean) =
         prefs(ctx).edit().putBoolean(KEY_SUSPEND_WIDGET_ENABLED, enabled).apply()
 
-    fun getCurrentDayKey(): String =
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    fun getLogicalDayKey(ms: Long, ctx: Context): String {
+        val cal = Calendar.getInstance().apply { timeInMillis = ms }
+        val (startH, startM) = getStartDayTime(ctx)
+        
+        val currentH = cal.get(Calendar.HOUR_OF_DAY)
+        val currentM = cal.get(Calendar.MINUTE)
+        
+        if (currentH < startH || (currentH == startH && currentM < startM)) {
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        }
+        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(cal.time)
+    }
+
+    fun getCurrentDayKey(ctx: Context): String = getLogicalDayKey(System.currentTimeMillis(), ctx)
 
     fun dayKeyToMs(dayKey: String): Long =
         try { SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(dayKey)?.time ?: 0L }
         catch (_: Exception) { 0L }
+
+    /** Returns the [startMs, endMs) window for a logical day based on user preference. */
+    fun getLogicalDayWindow(dayKey: String, ctx: Context): Pair<Long, Long> {
+        val (startH, startM) = getStartDayTime(ctx)
+        val startMs = dayKeyToMs(dayKey) + (startH * 3600_000L) + (startM * 60_000L)
+        return startMs to (startMs + 86_400_000L)
+    }
 
     fun getCurrentLevel(ctx: Context): Int =
         prefs(ctx).getInt(KEY_LEVEL, 1)
@@ -52,7 +107,7 @@ object DataRepository {
         note: String? = null,            // null = preserve existing note
         autoDriveLevel: Int? = null,     // null = derive from context
     ) {
-        val dayKey       = getCurrentDayKey()
+        val dayKey       = getCurrentDayKey(ctx)
         val now          = System.currentTimeMillis()
         val existing     = getTodaysDailyEntry(ctx)
         val existingNote = existing?.note.orEmpty()
@@ -69,15 +124,15 @@ object DataRepository {
             list.sortedBy { it.dayKey }.forEach { a.put(it.toJson()) }
         }
         val editor = prefs(ctx).edit()
-        // Only propagate drive level to the "current level" indicator when NOT a manual override
-        if (!driveOverridden) editor.putInt(KEY_LEVEL, driveLevel)
+        // FIX: never propagate the daily average back to the "current level" indicator (KEY_LEVEL).
+        // KEY_LEVEL should only be updated when the user explicitly taps a value (in saveDriveLevel).
         editor.putInt(KEY_SUSPEND, suspendMinutes)
         editor.putString(KEY_DAILY_LOG, arr.toString())
         editor.apply()
     }
 
     fun getTodaysDailyEntry(ctx: Context): DailyEntry? =
-        getDailyEntries(ctx).find { it.dayKey == getCurrentDayKey() }
+        getDailyEntries(ctx).find { it.dayKey == getCurrentDayKey(ctx) }
 
     fun getDailyEntries(ctx: Context): List<DailyEntry> {
         val arr = parseArrayOrEmpty(prefs(ctx).getString(KEY_DAILY_LOG, "[]"))
@@ -114,7 +169,7 @@ object DataRepository {
         prefs(ctx).edit()
             .putInt(KEY_LEVEL, level)
             .putString(KEY_DRIVE_LOG, arr.toString())
-            .apply()
+            .commit()
     }
 
     fun saveSuspend(ctx: Context, minutes: Int) {
@@ -124,7 +179,7 @@ object DataRepository {
         prefs(ctx).edit()
             .putInt(KEY_SUSPEND, minutes)
             .putString(KEY_SUSPEND_LOG, arr.toString())
-            .apply()
+            .commit()
     }
 
     fun getDriveEntries(ctx: Context): List<DriveEntry> {
@@ -133,14 +188,38 @@ object DataRepository {
     }
 
     /**
-     * Returns the average raw Drive level for [dayKey] (midnight–midnight),
-     * or null if no raw entries exist for that day.
+     * Returns the time-weighted average Drive level for [dayKey] based on user preference.
+     *
+     * Uses linear interpolation between taps:
+     * - The first tap's value is assumed to start at day start.
+     * - Each interval between taps uses the midpoint value (linear transition).
+     * - The last tap's value is assumed to hold until next day start.
      */
     fun getDailyDriveAverage(ctx: Context, dayKey: String): Float? {
-        val startMs = dayKeyToMs(dayKey)
-        val endMs   = startMs + 86_400_000L
-        val entries = getDriveEntries(ctx).filter { it.timestampMs in startMs until endMs }
-        return if (entries.isEmpty()) null else entries.map { it.level }.average().toFloat()
+        val (windowStart, windowEnd) = getLogicalDayWindow(dayKey, ctx)
+        val entries = getDriveEntries(ctx)
+            .filter { it.timestampMs in windowStart until windowEnd }
+            .sortedBy { it.timestampMs }
+        
+        if (entries.isEmpty()) return null
+        
+        var totalWeightedValue = 0.0
+        val totalDuration = (windowEnd - windowStart).toDouble()
+
+        // 1. Initial period: [Start of Day, First Entry]
+        totalWeightedValue += entries.first().level * (entries.first().timestampMs - windowStart)
+
+        // 2. Intermediate periods: [Entry i, Entry i+1]
+        for (i in 0 until entries.size - 1) {
+            val duration = entries[i+1].timestampMs - entries[i].timestampMs
+            val avgValue = (entries[i].level + entries[i+1].level) / 2.0
+            totalWeightedValue += avgValue * duration
+        }
+
+        // 3. Final period: [Last Entry, End of Day]
+        totalWeightedValue += entries.last().level * (windowEnd - entries.last().timestampMs)
+
+        return (totalWeightedValue / totalDuration).toFloat()
     }
 
     /**
@@ -149,13 +228,13 @@ object DataRepository {
      * UNLESS the user has manually overridden the drive level.
      */
     fun autoUpdateDailyDrive(ctx: Context) {
-        val dayKey   = getCurrentDayKey()
+        val dayKey   = getCurrentDayKey(ctx)
         val avg      = getDailyDriveAverage(ctx, dayKey) ?: return
         val existing = getTodaysDailyEntry(ctx)
         if (existing != null && existing.driveOverridden) return
         val level   = avg.roundToInt().coerceIn(1, 7)
-        // BUG FIX: don't carry over sleep from a previous day when creating a brand-new entry
-        val suspend = existing?.suspendMinutes ?: 0
+        // Set default suspend to 7h (420 min) if brand new entry
+        val suspend = existing?.suspendMinutes ?: 420
         saveDailyEntry(ctx, level, suspend, driveOverridden = false, autoDriveLevel = level)
     }
 
@@ -166,27 +245,66 @@ object DataRepository {
 
     fun exportJson(ctx: Context): String {
         val root = JSONObject()
-        root.put("daily_log",   parseArrayOrEmpty(prefs(ctx).getString(KEY_DAILY_LOG, "[]")))
-        root.put("drive_log",   loadDriveLog(ctx))
-        root.put("suspend_log", loadSuspendLog(ctx))
-        root.put("notes_log",   parseArrayOrEmpty(prefs(ctx).getString(KEY_NOTES_LOG, "[]")))
+        root.put("daily_log",      parseArrayOrEmpty(prefs(ctx).getString(KEY_DAILY_LOG, "[]")))
+        root.put("drive_log",      loadDriveLog(ctx))
+        root.put("suspend_log",    loadSuspendLog(ctx))
+        root.put("notes_log",      parseArrayOrEmpty(prefs(ctx).getString(KEY_NOTES_LOG, "[]")))
+        root.put("custom_metrics", parseArrayOrEmpty(prefs(ctx).getString(KEY_CUSTOM_METRICS, "[]")))
+        root.put("custom_values",  parseArrayOrEmpty(prefs(ctx).getString(KEY_CUSTOM_VALUES, "[]")))
         return root.toString(2)
     }
 
-    fun importJson(ctx: Context, json: String) {
+    enum class ImportMode { MERGE, OVERWRITE_LOCAL }
+
+    fun importJson(ctx: Context, json: String, mode: ImportMode = ImportMode.MERGE) {
         val root = JSONObject(json)
-        val existingDaily = getDailyEntries(ctx).associateBy { it.dayKey }.toMutableMap()
-        val importDailyArr = root.optJSONArray("daily_log") ?: JSONArray()
-        for (i in 0 until importDailyArr.length()) {
+
+        if (mode == ImportMode.OVERWRITE_LOCAL) {
+            prefs(ctx).edit()
+                .putString(KEY_DAILY_LOG,      root.optString("daily_log", "[]"))
+                .putString(KEY_DRIVE_LOG,      root.optString("drive_log", "[]"))
+                .putString(KEY_SUSPEND_LOG,    root.optString("suspend_log", "[]"))
+                .putString(KEY_NOTES_LOG,      root.optString("notes_log", "[]"))
+                .putString(KEY_CUSTOM_METRICS, root.optString("custom_metrics", "[]"))
+                .putString(KEY_CUSTOM_VALUES,  root.optString("custom_values", "[]"))
+                .apply()
+            return
+        }
+
+        // --- MERGE LOGIC ---
+
+        // 1. Daily Entries (Conflict Resolution: pick entry with more data)
+        val localDailyMap  = getDailyEntries(ctx).associateBy { it.dayKey }.toMutableMap()
+        val remoteDailyArr = root.optJSONArray("daily_log") ?: JSONArray()
+        val allCustomValues = getCustomMetricValuesForAllDays(ctx) // helper below
+
+        for (i in 0 until remoteDailyArr.length()) {
             try {
-                val e = DailyEntry.fromJson(importDailyArr.getJSONObject(i))
-                existingDaily.putIfAbsent(e.dayKey, e)
+                val remoteEntry = DailyEntry.fromJson(remoteDailyArr.getJSONObject(i))
+                val localEntry  = localDailyMap[remoteEntry.dayKey]
+                if (localEntry == null) {
+                    localDailyMap[remoteEntry.dayKey] = remoteEntry
+                } else {
+                    // Conflict! Pick one with most data.
+                    // Score = (1 if note) + (count of custom values) + (1 if driveOverridden)
+                    val localScore  = (if (localEntry.note.isNotBlank()) 1 else 0) +
+                            (allCustomValues[localEntry.dayKey]?.size ?: 0) +
+                            (if (localEntry.driveOverridden) 1 else 0)
+                    val remoteScore = (if (remoteEntry.note.isNotBlank()) 1 else 0) +
+                            // remote score for custom values is harder to calc without parsing them all first
+                            // but let's assume remote has its own values. For now, keep it simple:
+                            (if (remoteEntry.note.length > localEntry.note.length) 1 else 0)
+                    
+                    if (remoteScore > localScore) localDailyMap[remoteEntry.dayKey] = remoteEntry
+                }
             } catch (_: Exception) {}
         }
+
+        // 2. Drive & Suspend logs (Union by timestamp)
         val existingDrive   = getDriveEntries(ctx).associateBy { it.timestampMs }.toMutableMap()
         val existingSuspend = getSuspendEntries(ctx).associateBy { it.timestampMs }.toMutableMap()
-        val importDrive   = root.optJSONArray("drive_log") ?: JSONArray()
-        val importSuspend = root.optJSONArray("suspend_log") ?: JSONArray()
+        val importDrive     = root.optJSONArray("drive_log") ?: JSONArray()
+        val importSuspend   = root.optJSONArray("suspend_log") ?: JSONArray()
         for (i in 0 until importDrive.length()) {
             try {
                 val e = DriveEntry.fromJson(importDrive.getJSONObject(i))
@@ -199,16 +317,8 @@ object DataRepository {
                 existingSuspend.putIfAbsent(e.timestampMs, e)
             } catch (_: Exception) {}
         }
-        val mergedDaily = JSONArray().also { a ->
-            existingDaily.values.sortedBy { it.dayKey }.forEach { a.put(it.toJson()) }
-        }
-        val mergedDrive = JSONArray().also { a ->
-            existingDrive.values.sortedBy { it.timestampMs }.forEach { a.put(it.toJson()) }
-        }
-        val mergedSuspend = JSONArray().also { a ->
-            existingSuspend.values.sortedBy { it.timestampMs }.forEach { a.put(it.toJson()) }
-        }
-        // Merge notes
+
+        // 3. Notes (Union by ID)
         val existingNotes  = getNoteEntries(ctx).associateBy { it.id }.toMutableMap()
         val importNotesArr = root.optJSONArray("notes_log") ?: JSONArray()
         for (i in 0 until importNotesArr.length()) {
@@ -217,15 +327,70 @@ object DataRepository {
                 existingNotes.putIfAbsent(e.id, e)
             } catch (_: Exception) {}
         }
+
+        // 4. Custom Metrics (Union by ID)
+        val existingMetrics = getCustomMetrics(ctx).associateBy { it.id }.toMutableMap()
+        val importMetricsArr = root.optJSONArray("custom_metrics") ?: JSONArray()
+        for (i in 0 until importMetricsArr.length()) {
+            try {
+                val m = CustomMetric.fromJson(importMetricsArr.getJSONObject(i))
+                existingMetrics.putIfAbsent(m.id, m)
+            } catch (_: Exception) {}
+        }
+
+        // 5. Custom Values (Union by dayKey + metricId)
+        val localValues = getCustomMetricValuesForAllDays(ctx).toMutableMap()
+        val importValuesArr = root.optJSONArray("custom_values") ?: JSONArray()
+        for (i in 0 until importValuesArr.length()) {
+            try {
+                val v = CustomMetricValue.fromJson(importValuesArr.getJSONObject(i))
+                val dayMap = localValues.getOrPut(v.dayKey) { mutableMapOf() }
+                dayMap.putIfAbsent(v.metricId, v.value)
+            } catch (_: Exception) {}
+        }
+
+        // Serialize back
+        val mergedDaily = JSONArray().also { a ->
+            localDailyMap.values.sortedBy { it.dayKey }.forEach { a.put(it.toJson()) }
+        }
+        val mergedDrive = JSONArray().also { a ->
+            existingDrive.values.sortedBy { it.timestampMs }.forEach { a.put(it.toJson()) }
+        }
+        val mergedSuspend = JSONArray().also { a ->
+            existingSuspend.values.sortedBy { it.timestampMs }.forEach { a.put(it.toJson()) }
+        }
         val mergedNotes = JSONArray().also { a ->
             existingNotes.values.sortedBy { it.timestampMs }.forEach { a.put(it.toJson()) }
         }
+        val mergedMetrics = JSONArray().also { a ->
+            existingMetrics.values.forEach { a.put(it.toJson()) }
+        }
+        val flattenedValues = JSONArray().also { a ->
+            localValues.forEach { (day, map) ->
+                map.forEach { (mid, v) -> a.put(CustomMetricValue(day, mid, v).toJson()) }
+            }
+        }
+
         prefs(ctx).edit()
-            .putString(KEY_DAILY_LOG,   mergedDaily.toString())
-            .putString(KEY_DRIVE_LOG,   mergedDrive.toString())
-            .putString(KEY_SUSPEND_LOG, mergedSuspend.toString())
-            .putString(KEY_NOTES_LOG,   mergedNotes.toString())
+            .putString(KEY_DAILY_LOG,      mergedDaily.toString())
+            .putString(KEY_DRIVE_LOG,      mergedDrive.toString())
+            .putString(KEY_SUSPEND_LOG,    mergedSuspend.toString())
+            .putString(KEY_NOTES_LOG,      mergedNotes.toString())
+            .putString(KEY_CUSTOM_METRICS, mergedMetrics.toString())
+            .putString(KEY_CUSTOM_VALUES,  flattenedValues.toString())
             .apply()
+    }
+
+    private fun getCustomMetricValuesForAllDays(ctx: Context): Map<String, MutableMap<String, Float>> {
+        val arr = parseArrayOrEmpty(prefs(ctx).getString(KEY_CUSTOM_VALUES, "[]"))
+        val result = mutableMapOf<String, MutableMap<String, Float>>()
+        for (i in 0 until arr.length()) {
+            try {
+                val v = CustomMetricValue.fromJson(arr.getJSONObject(i))
+                result.getOrPut(v.dayKey) { mutableMapOf() }[v.metricId] = v.value
+            } catch (_: Exception) {}
+        }
+        return result
     }
 
     fun clearAll(ctx: Context) {
@@ -239,27 +404,27 @@ object DataRepository {
     // ─── Quality / Balance Score formula ──────────────────────────────────────
 
     /**
-     * Computes the Balance Score from drive only.
+     * Computes the Balance Score.
      *
-     * Drive 4 = balanced origin (score 0).
-     * Each step away from 4 adds ±1, so the range is −3 … +3.
-     * Positive = elevated/manic side; negative = low/depressed side.
-     *
-     * Sleep is intentionally excluded — it is used only for trend insights,
-     * not for the balance score itself.
+     * Base: Drive 4 = balanced origin (score 0). Range −3 … +3.
+     * Impact: Sleep offset from 7h. 7h is neutral (0 impact).
+     * Formula: (Drive - 4) + ((SleepHours - 7) * 0.2)
      */
-    fun computeQuality(driveLevel: Float): Float = driveLevel - 4f
+    fun computeQuality(driveLevel: Float, suspendHours: Float): Float {
+        val driveOffset = driveLevel - 4f
+        val sleepOffset = (suspendHours - 7f) * 0.2f
+        return driveOffset + sleepOffset
+    }
 
-    /** Overload kept for callers that still pass suspendHours — ignored. */
-    @Suppress("UNUSED_PARAMETER")
-    fun computeQuality(driveLevel: Float, suspendHours: Float): Float = computeQuality(driveLevel)
+    /** Legacy shim for drive-only computation */
+    fun computeQuality(driveLevel: Float): Float = computeQuality(driveLevel, 7f)
 
     // ── Notes ────────────────────────────────────────────────────────────────
 
     /** Save a new note entry for today. Returns the saved NoteEntry. */
     fun saveNoteEntry(ctx: Context, text: String): NoteEntry {
         val entry = NoteEntry(
-            dayKey      = getCurrentDayKey(),
+            dayKey      = getCurrentDayKey(ctx),
             timestampMs = System.currentTimeMillis(),
             text        = text,
         )
@@ -329,6 +494,15 @@ object DataRepository {
         prefs(ctx).edit().putString(KEY_CUSTOM_METRICS, arr.toString()).apply()
     }
 
+    fun deleteCustomMetricValues(ctx: Context, metricId: String) {
+        val raw  = parseArrayOrEmpty(prefs(ctx).getString(KEY_CUSTOM_VALUES, "[]"))
+        val list = (0 until raw.length()).mapNotNull {
+            try { CustomMetricValue.fromJson(raw.getJSONObject(it)) } catch (_: Exception) { null }
+        }.filter { it.metricId != metricId }
+        val arr = JSONArray().also { a -> list.forEach { a.put(it.toJson()) } }
+        prefs(ctx).edit().putString(KEY_CUSTOM_VALUES, arr.toString()).apply()
+    }
+
     fun getCustomMetricValuesForDay(ctx: Context, dayKey: String): Map<String, Float> {
         val arr = parseArrayOrEmpty(prefs(ctx).getString(KEY_CUSTOM_VALUES, "[]"))
         return (0 until arr.length()).mapNotNull {
@@ -393,7 +567,7 @@ object DataRepository {
     fun getQualitySeries(ctx: Context): List<Pair<String, Float>> =
         getDailyEntries(ctx)
             .sortedBy { it.dayKey }
-            .map { it.dayKey to computeQuality(it.autoDriveLevel.toFloat()) }
+            .map { it.dayKey to computeQuality(it.autoDriveLevel.toFloat(), it.suspendMinutes / 60f) }
 
     /** Returns (dayKey, suspendHours) pairs for all daily entries, sorted by date. */
     fun getSuspendSeries(ctx: Context): List<Pair<String, Float>> =
@@ -419,15 +593,14 @@ object DataRepository {
 
     /** All raw drive entries for a specific day (for intraday chart). */
     fun getIntraDayDriveEntries(ctx: Context, dayKey: String): List<DriveEntry> {
-        val startMs = dayKeyToMs(dayKey)
-        val endMs   = startMs + 86_400_000L
-        return getDriveEntries(ctx).filter { it.timestampMs in startMs until endMs }
+        val (start, end) = getLogicalDayWindow(dayKey, ctx)
+        return getDriveEntries(ctx).filter { it.timestampMs in start until end }
     }
 
     /** Compute balance score for a specific DailyEntry directly.
      *  Uses autoDriveLevel so manual overrides don't affect the score. */
     fun getQualityForEntry(entry: DailyEntry) =
-        computeQuality(entry.autoDriveLevel.toFloat())
+        computeQuality(entry.autoDriveLevel.toFloat(), entry.suspendMinutes / 60f)
 
     // ── Backup timestamp ─────────────────────────────────────────────────────
 

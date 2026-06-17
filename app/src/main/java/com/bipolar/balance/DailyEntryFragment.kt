@@ -77,7 +77,7 @@ class DailyEntryFragment : Fragment() {
         b.btnResetDrive.setOnClickListener {
             val ctx = requireContext()
             driveOverridden = false
-            val avg = DataRepository.getDailyDriveAverage(ctx, DataRepository.getCurrentDayKey())
+            val avg = DataRepository.getDailyDriveAverage(ctx, DataRepository.getCurrentDayKey(ctx))
             if (avg != null) {
                 driveSelected = (avg.toInt().coerceIn(1, 7)) - 1
                 b.barDrive.selectedIndex = driveSelected
@@ -103,6 +103,11 @@ class DailyEntryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
+        val ctx = requireContext()
+        val trackingEnabled = DataRepository.getSuspendTrackingEnabled(ctx)
+        b.layoutSuspendCol.visibility = if (trackingEnabled) View.VISIBLE else View.GONE
+
         loadExistingEntry()
         updateDate()
         refreshMetrics()
@@ -112,7 +117,7 @@ class DailyEntryFragment : Fragment() {
     private fun loadExistingEntry() {
         val ctx    = requireContext()
         val entry  = DataRepository.getTodaysDailyEntry(ctx)
-        val dayKey = DataRepository.getCurrentDayKey()
+        val dayKey = DataRepository.getCurrentDayKey(ctx)
         val avg    = DataRepository.getDailyDriveAverage(ctx, dayKey)
 
         driveOverridden = entry?.driveOverridden ?: false
@@ -150,7 +155,7 @@ class DailyEntryFragment : Fragment() {
 
     private fun refreshNotes() {
         val ctx    = requireContext()
-        val dayKey = DataRepository.getCurrentDayKey()
+        val dayKey = DataRepository.getCurrentDayKey(ctx)
         val notes  = DataRepository.getNotesForDay(ctx, dayKey)
         val dp     = ctx.resources.displayMetrics.density
 
@@ -211,11 +216,11 @@ class DailyEntryFragment : Fragment() {
     private fun refreshMetrics() {
         val ctx     = requireContext()
         val metrics = DataRepository.getCustomMetrics(ctx)
-        val dayKey  = DataRepository.getCurrentDayKey()
+        val dayKey  = DataRepository.getCurrentDayKey(ctx)
         val values  = DataRepository.getCustomMetricValuesForDay(ctx, dayKey).toMutableMap()
 
         val cal = Calendar.getInstance().also { it.add(Calendar.DAY_OF_YEAR, -1) }
-        val yesterdayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(cal.time)
+        val yesterdayKey = DataRepository.getLogicalDayKey(cal.timeInMillis, ctx)
         val yesterdayValues = DataRepository.getCustomMetricValuesForDay(ctx, yesterdayKey)
         for (metric in metrics) {
             if (metric.persistsToNextDay && values[metric.id] == null) {
@@ -264,12 +269,12 @@ class DailyEntryFragment : Fragment() {
                 val btnYes = makeToggleButton(ctx, "Yes",  currentValue == 1f, dp)
                 val btnNo  = makeToggleButton(ctx, "No",   currentValue == 0f, dp)
                 btnYes.setOnClickListener {
-                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(), metric.id, 1f)
+                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(ctx), metric.id, 1f)
                     CustomMetricWidget.refreshAll(ctx)
                     updateToggle(btnYes, true); updateToggle(btnNo, false)
                 }
                 btnNo.setOnClickListener {
-                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(), metric.id, 0f)
+                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(ctx), metric.id, 0f)
                     CustomMetricWidget.refreshAll(ctx)
                     updateToggle(btnYes, false); updateToggle(btnNo, true)
                 }
@@ -294,7 +299,7 @@ class DailyEntryFragment : Fragment() {
                 val btnP = makeStepper(ctx, "+", dp)
 
                 fun persist() {
-                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(), metric.id, value.toFloat())
+                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(ctx), metric.id, value.toFloat())
                     CustomMetricWidget.refreshAll(ctx)
                 }
                 btnM.setOnClickListener { value = (value - 1).coerceAtLeast(metric.rangeMin); tvV.text = "$value"; persist() }
@@ -320,7 +325,7 @@ class DailyEntryFragment : Fragment() {
                 val btnP = makeStepper(ctx, "+", dp)
 
                 fun persist() {
-                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(), metric.id, count.toFloat())
+                    DataRepository.saveCustomMetricValue(ctx, DataRepository.getCurrentDayKey(ctx), metric.id, count.toFloat())
                     CustomMetricWidget.refreshAll(ctx)
                 }
                 btnM.setOnClickListener { count = (count - 1).coerceAtLeast(0); tvV.text = "$count"; persist() }
@@ -369,7 +374,7 @@ class DailyEntryFragment : Fragment() {
     }
 
     private fun updateDate() {
-        b.tvDate.text = getString(R.string.daily_entry_date, DataRepository.getCurrentDayKey())
+        b.tvDate.text = getString(R.string.daily_entry_date, DataRepository.getCurrentDayKey(requireContext()))
     }
 
     private fun updateDriveLabel() {

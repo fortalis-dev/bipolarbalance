@@ -32,6 +32,9 @@ class SettingsCustomDataFragment : Fragment() {
         view.findViewById<View>(R.id.btn_add_data_point).setOnClickListener {
             openMetricBuilder(null)
         }
+        view.findViewById<View>(R.id.btn_back).setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
     }
 
     override fun onResume() {
@@ -146,8 +149,13 @@ class SettingsCustomDataFragment : Fragment() {
                 setOnClickListener {
                     MaterialAlertDialogBuilder(ctx)
                         .setTitle("Delete \"${metric.name}\"?")
-                        .setMessage("This removes the data point and all its recorded values.")
-                        .setPositiveButton("Delete") { _, _ ->
+                        .setMessage("Would you like to also delete all history for this data point?")
+                        .setPositiveButton("Delete Everything") { _, _ ->
+                            DataRepository.deleteCustomMetric(ctx, metric.id)
+                            DataRepository.deleteCustomMetricValues(ctx, metric.id)
+                            refreshList()
+                        }
+                        .setNeutralButton("Keep History") { _, _ ->
                             DataRepository.deleteCustomMetric(ctx, metric.id)
                             refreshList()
                         }

@@ -90,6 +90,7 @@
 
         <!-- Suspend column -->
         <LinearLayout
+            android:id="@+id/layout_suspend_col"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -98,6 +99,7 @@
             android:paddingStart="8dp">
 
             <TextView
+                android:id="@+id/label_suspend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/suspend_label"

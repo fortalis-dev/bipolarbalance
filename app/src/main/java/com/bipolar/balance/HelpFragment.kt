@@ -26,6 +26,10 @@ class HelpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        b.btnBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         b.tvHomepage.setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://fortalis-dev.github.io")))
         }

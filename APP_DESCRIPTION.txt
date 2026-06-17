@@ -1,0 +1,73 @@
+MY BALANCE - APP OVERVIEW & FEATURE SPECIFICATION
+================================================
+
+App Name: My Balance
+Package Name: com.bipolar.balance
+Core Objective: A specialized tool for tracking energy levels and rest duration to help manage bipolar balance. It uses a "thermometer" concept for energy (Drive) and a "suspend" concept for rest.
+
+1. CORE CONCEPTS
+----------------
+* Drive Level (1–7): A subjective measurement of current energy, mood, or intensity.
+  - Level 1: Very low / Cold (Blue)
+  - Level 4: Balanced / Neutral (Green)
+  - Level 7: Very high / Hot (Red)
+* Suspend (Rest): Tracks total time spent resting, paused, or inactive during a 24-hour period (0h to 24h).
+* Logical Day: To accommodate varying sleep patterns, the app uses a logical day that starts at 10:00 AM. Data logged before 10:00 AM is attributed to the previous calendar day.
+
+2. MAIN FEATURES
+----------------
+A. Dashboard (Overview)
+- Daily Balance Score: Displays a calculated "Balance Score" based on your average Drive (Drive Level - 4).
+- Intraday Drive Graph: A real-time visualization of all raw Drive inputs recorded throughout the current logical day.
+- Quality Over Time: A trend graph showing how your balance score fluctuates day-to-day.
+- Sleep/Suspend Trend: Overlay graph showing rest duration in relation to energy levels.
+- Note Pinning: Displays 📌 indicators on graphs where text notes were recorded.
+
+B. Drive Input (Real-time Tracking)
+- Thermometer Bar: A 7-segment interactive bar for rapid logging of current state.
+- History Log: Shows a timestamped list of the most recent inputs.
+- Auto-Averaging: Every input is used to calculate a weighted average for the day's total score.
+
+C. Daily Entry (Refinement)
+- Manual Override: Allows the user to set a final "Daily Drive" level if the auto-average doesn't reflect their overall day.
+- Suspend Stepper: An easy-to-use interface for logging total rest hours.
+- Daily Notes: Field for recording context, triggers, or specific events for that day.
+- Saved Status: Real-time confirmation of when the day's data was last updated.
+
+D. Insights & Analytics
+- Sleep vs. Drive Correlation: Statistical analysis (Pearson r) showing how your rest levels impact your energy.
+- Lag-Effect Analysis: Calculates how sleep on previous days affects your energy today and tomorrow.
+- Smooth Trend Charts: Dual-line charts showing Auto-Drive vs. Sleep over 7-day or 30-day periods.
+
+E. Custom Data Points (Metrics)
+- Metric Builder: Users can create their own tracking variables.
+- Three Types:
+  1. Yes/No (e.g., "Took Medication?")
+  2. Scale (e.g., "Anxiety 0-10")
+  3. Counter (e.g., "Cups of Coffee")
+- Persistence: Metrics can be set to "persist," automatically carrying yesterday's value over to today as a default.
+
+3. HOME SCREEN WIDGETS
+----------------------
+- Drive Widget: 7-segment color bar for instant logging without opening the app.
+- Suspend Widget: Dedicated bar for updating rest duration directly from the home screen.
+- Data Point Widget: Can be configured to track any one of the user-defined Custom Metrics.
+
+4. DATA & SYNC
+--------------
+- Google Drive Integration: Secure, silent backup to the user's private "AppDataFolder" on Google Drive.
+- Manual Sync: Options to manually "Upload" or "Download & Merge" data across multiple devices.
+- Local Privacy: All data is stored locally on the device unless the user chooses to enable Drive sync.
+
+5. USER INTERFACE
+-----------------
+- Aesthetic: Soft "Aquarelle" (watercolor) palette designed to be calming and non-intrusive.
+- Color Coding: Intuitive shift from cool blues (low energy) to sage greens (balanced) to warm terracotta/roses (high energy).
+- Dark Mode Support: Adaptive theme for nighttime use.
+
+6. TECHNICAL SPECIFICATIONS
+---------------------------
+- Platform: Android (Min SDK 26, Target SDK 35)
+- Architecture: Modern Kotlin with Fragment-based navigation and ViewBinding.
+- Repository Pattern: Centralized `DataRepository` managing JSON-based local storage and SharedPreferences.
+- Custom Views: Custom-drawn canvas views for the thermometer bars (`ThermoBarView`) and all specialized graphs.
