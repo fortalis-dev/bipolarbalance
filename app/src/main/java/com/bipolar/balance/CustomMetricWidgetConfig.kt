@@ -45,7 +45,7 @@ class CustomMetricWidgetConfig : AppCompatActivity() {
         setContentView(R.layout.activity_widget_config)
 
         // Handle window insets
-        val root = findViewById<LinearLayout>(android.R.id.content).getChildAt(0)
+        val root = findViewById<android.view.View>(R.id.root_config_layout)
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updatePadding(

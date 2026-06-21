@@ -33,7 +33,7 @@ class CustomMetricWidget : AppWidgetProvider() {
         private val COLOR_RANGE_INACTIVE = Color.parseColor("#D8CECC")
 
         private fun getMetricId(ctx: Context, widgetId: Int): String? =
-            ctx.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE).getString("m_$widgetId", null)
+            ctx.getSharedPreferences("widget_config", Context.MODE_PRIVATE).getString("metric_$widgetId", null)
 
         fun updateWidget(ctx: Context, id: Int) {
             val metricId = getMetricId(ctx, id) ?: return
@@ -151,8 +151,8 @@ class CustomMetricWidget : AppWidgetProvider() {
     }
 
     override fun onDeleted(ctx: Context, ids: IntArray) {
-        val p = ctx.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE).edit()
-        ids.forEach { p.remove("m_$it") }
+        val p = ctx.getSharedPreferences("widget_config", Context.MODE_PRIVATE).edit()
+        ids.forEach { p.remove("metric_$it") }
         p.apply()
     }
 
